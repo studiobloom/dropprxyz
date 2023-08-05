@@ -2147,6 +2147,17 @@ figcaption {
   transform: translate(0);
 }
 
+.section-buildr {
+  min-height: 95vh;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  transform: translate(0);
+}
+
 .button-line-right {
   width: 0;
   height: 1px;

@@ -110,8 +110,48 @@ a,
                   </a>
                 </nav>
                 <div class="navbar-right-button">
-                  <a href="{{ links.23 }}" class="button secondary w-button">{{ texts.-204ff998 }}</a>
+                  <button id="identity-button" class="button secondary w-button">Sign In</button>
                 </div>
+                
+                <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+                <script>
+                  document.addEventListener("DOMContentLoaded", function() {
+                    var user = netlifyIdentity.currentUser();
+                    var button = document.getElementById('identity-button');                
+                    netlifyIdentity.on('signup', async (user) => {
+                      await netlifyIdentity.updateUser({ app_metadata: { roles: ['Standard'] } });
+                      setTimeout(function() {
+                        window.location.href = '/';
+                      }, 500);
+                    });
+                
+                    if (user) {
+                      button.textContent = 'Sign Out';
+                      button.onclick = function() {
+                        netlifyIdentity.logout();
+                      };
+                    } else {
+                      button.textContent = 'Sign In';
+                      button.onclick = function() {
+                        netlifyIdentity.open('login');
+                      };
+                    }
+                
+                    netlifyIdentity.on('login', function() {
+                      button.textContent = 'Sign Out';
+                      button.onclick = function() {
+                        netlifyIdentity.logout();
+                      };
+                    });
+                
+                    netlifyIdentity.on('logout', function() {
+                      button.textContent = 'Sign In';
+                      button.onclick = function() {
+                        netlifyIdentity.open('login');
+                      };
+                    });
+                  });
+                </script>
                 <div data-w-id="a26b06a4-2c02-bc86-9274-74360e531fee" class="mobile-menu-toggle">
                   <div class="mobile-menu-toggle-line _01"></div>
                   <div class="mobile-menu-toggle-line _02"></div>

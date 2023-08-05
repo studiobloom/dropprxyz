@@ -4,22 +4,36 @@
   
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var user = netlifyIdentity.currentUser();
+    async function displayContentBasedOnRole(role) {
+      try {
+        const response = await fetch('/.netlify/functions/get-protected-content', {
+          method: 'POST',
+          body: JSON.stringify({ type: role }), 
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const data = await response.json();
+        const iframeContent = data.src.content;
 
-      // Redirect to the login page if the user is not authenticated
-      if (!user) {
-        window.location.href = "/";
+        document.getElementById('iframe-container').innerHTML = iframeContent;
+      } catch (error) {
+        console.error('Error fetching content:', error);
       }
-    });
-  </script>  
+    }
   
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on('login', () => {
+        const user = window.netlifyIdentity.currentUser();
+        const role = user && user.app_metadata ? user.app_metadata.roles[0] : 'free';
   
-  
-  
-  
-  
-  
+        displayContentBasedOnRole(role);
+      });
+    }
+  </script>
+
   
   <meta content="width=device-width, initial-scale=1" name="viewport">
   
@@ -68,7 +82,7 @@
                       <div class="navbar-menu-item-line"></div>
                     </div>
                   </a>
-                  <a href="{{ links.23 }}" class="navbar-menu-item-link w-inline-block">
+                  <a href="https://droppr.xyz/contact/" class="navbar-menu-item-link w-inline-block">
                     <div class="navbar-menu-item-inner">
                       <div>{{ texts.-64104400 }}</div>
                       <div class="navbar-menu-item-line"></div>
@@ -76,8 +90,46 @@
                   </a>
                 </nav>
                 <div class="navbar-right-button">
-                  <a href="{{ links.23 }}" class="button secondary w-button">{{ texts.-204ff998 }}</a>
+                  <button id="identity-button" class="button secondary w-button">Sign In</button>
                 </div>
+                <script>
+                  document.addEventListener("DOMContentLoaded", function() {
+                    var user = netlifyIdentity.currentUser();
+                    var button = document.getElementById('identity-button');                
+                    netlifyIdentity.on('signup', async (user) => {
+                      await netlifyIdentity.updateUser({ app_metadata: { roles: ['Standard'] } });
+                      setTimeout(function() {
+                        window.location.href = '/';
+                      }, 500);
+                    });
+                
+                    if (user) {
+                      button.textContent = 'Sign Out';
+                      button.onclick = function() {
+                        netlifyIdentity.logout();
+                      };
+                    } else {
+                      button.textContent = 'Sign In';
+                      button.onclick = function() {
+                        netlifyIdentity.open('login');
+                      };
+                    }
+                
+                    netlifyIdentity.on('login', function() {
+                      button.textContent = 'Sign Out';
+                      button.onclick = function() {
+                        netlifyIdentity.logout();
+                      };
+                    });
+                
+                    netlifyIdentity.on('logout', function() {
+                      button.textContent = 'Sign In';
+                      button.onclick = function() {
+                        netlifyIdentity.open('login');
+                      };
+                    });
+                  });
+                </script>
                 <div data-w-id="a26b06a4-2c02-bc86-9274-74360e531fee" class="mobile-menu-toggle">
                   <div class="mobile-menu-toggle-line _01"></div>
                   <div class="mobile-menu-toggle-line _02"></div>
@@ -115,12 +167,13 @@
           </div>
         </div>
       </header>
-      <section class="section-404">
+
+      <section class="section-buildr">
         <div class="page-padding">
           <div class="container-xxlarge">
-              <div style="width: 100VW; height: 100VH; overflow: hidden;">
-                <iframe src="https://studiobloom.github.io/droppr.buildr/buildr" frameborder="0" style="width: 100%; height: 100%;"></iframe>
-              </a>
+            <div style="width: 100VW; height: 100VH; overflow: hidden;">
+              <h1 id="signInMessage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;">Please Sign In to use Droppr Buildr.</h1>
+              <div id="iframe-container" style="width: 100VW; height: 100VH; overflow: hidden;"></div>
             </div>
           </div>
         </div>

@@ -7,8 +7,3 @@ functions = "functions"
   from = "/admin"
   to = "/"
   status = 302
-
-[[redirects]]
-  from = "/buildr/*"
-  to = "/.netlify/functions/auth"
-  status = 200
